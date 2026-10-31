@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C&C Esportes | Mantos 1.1 Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+
+<!-- Header / Navbar com Links Reais para Troca de Tela -->
+<header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="/" class="text-2xl font-black tracking-widest text-amber-500 uppercase flex items-center gap-2">
+            <i class="fa-solid fa-shirt"></i> C&C Esportes
+        </a>
+
+        <nav class="hidden md:flex space-x-6 text-sm font-semibold tracking-wide">
+            <a href="/"
+               th:classappend="${categoriaAtiva == 'Todos' ? 'text-amber-500 border-b-2 border-amber-500 pb-1' : 'hover:text-amber-400'}">Início</a>
+
+            <a href="/?categoria=Nacionais"
+               th:classappend="${categoriaAtiva == 'Nacionais' ? 'text-amber-500 border-b-2 border-amber-500 pb-1' : 'hover:text-amber-400'}">Nacionais</a>
+
+            <a href="/?categoria=Internacionais"
+               th:classappend="${categoriaAtiva == 'Internacionais' ? 'text-amber-500 border-b-2 border-amber-500 pb-1' : 'hover:text-amber-400'}">Internacionais</a>
+
+            <a href="/?categoria=Seleções"
+               th:classappend="${categoriaAtiva == 'Seleções' ? 'text-amber-500 border-b-2 border-amber-500 pb-1' : 'hover:text-amber-400'}">Seleções</a>
+
+            <a href="/?categoria=Retrô"
+               th:classappend="${categoriaAtiva == 'Retrô' ? 'text-amber-500 border-b-2 border-amber-500 pb-1' : 'hover:text-amber-400'}">Retrô</a>
+        </nav>
+
+        <div class="flex items-center gap-4">
+            <button class="bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-slate-950 p-2.5 rounded-full transition">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Banner Hero -->
+<section class="bg-gradient-to-r from-amber-600 via-amber-700 to-amber-900 py-10 px-6 text-center shadow-xl">
+    <div class="max-w-4xl mx-auto">
+        <span class="bg-amber-950/40 text-amber-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">Catálogo Oficial 2024 - 2026</span>
+        <h2 class="text-3xl md:text-4xl font-black text-white uppercase tracking-tight mt-2">Mantos Thai 1.1 Importados</h2>
+        <p class="text-amber-100 text-sm mt-1 font-medium">Acabamento impecável, tecido de alta performance e detalhes oficiais.</p>
+    </div>
+</section>
+
+<!-- Vitrine de Produtos -->
+<main class="max-w-7xl mx-auto px-6 py-10 flex-grow w-full">
+    <div class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
+        <h3 class="text-xl font-black text-slate-100 flex items-center gap-3">
+            <span class="w-2.5 h-6 bg-amber-500 rounded-full"></span>
+            <span th:text="${categoriaAtiva == 'Todos' ? 'Produtos Disponíveis' : 'Categoria: ' + categoriaAtiva}">Produtos Disponíveis</span>
+        </h3>
+    </div>
+
+    <!-- Grid de Produtos Vindos do Banco -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div th:each="produto : ${produtos}" class="group bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-amber-500/60 hover:shadow-2xl hover:shadow-amber-500/10 transition duration-300 flex flex-col justify-between">
+
+            <div class="relative overflow-hidden bg-slate-800">
+                <img th:src="${produto.imagemUrl != null ? produto.imagemUrl : 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=600'}"
+                     alt="Foto do Manto"
+                     class="w-full h-72 object-cover group-hover:scale-105 transition duration-500"
+                     onerror="this.src='https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=600'">
+
+                <!-- Selo de Destaque -->
+                <span th:if="${produto.selo != null}" th:text="${produto.selo.nome}"
+                      class="absolute top-3 left-3 bg-amber-500 text-slate-950 text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider shadow-md">
+                        SELO
+                    </span>
+            </div>
+
+            <div class="p-5 flex-grow flex flex-col justify-between">
+                <div>
+                    <span th:text="${produto.qualidade != null ? produto.qualidade : 'Qualidade Thai 1.1'}" class="text-[11px] font-semibold text-amber-500 uppercase tracking-wider block mb-1">Qualidade</span>
+                    <h4 th:text="${produto.nome}" class="font-bold text-base text-slate-100 line-clamp-2 group-hover:text-amber-400 transition">Nome da Camisa</h4>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-800/80 flex justify-between items-center">
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase tracking-wider block">A Partir De</span>
+                        <span th:text="${'R$ ' + #numbers.formatDecimal(produto.precoAPartir != null ? produto.precoAPartir : 0, 1, 'POINT', 2, 'COMMA')}"
+                              class="text-amber-400 font-black text-xl">R$ 0,00</span>
+                    </div>
+                    <button class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold px-3.5 py-2 rounded-xl transition text-sm flex items-center gap-1.5 shadow-lg shadow-amber-500/20">
+                        Comprar
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Caso não haja produtos na categoria -->
+        <div th:if="${#lists.isEmpty(produtos)}" class="col-span-full text-center py-16 bg-slate-900/50 rounded-2xl border border-slate-800">
+            <i class="fa-solid fa-box-open text-4xl text-slate-600 mb-3"></i>
+            <p class="text-slate-400 text-base font-medium">Nenhum manto encontrado nesta categoria.</p>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="border-t border-slate-800 bg-slate-900 py-6 text-center text-slate-500 text-sm">
+    <p>&copy; 2026 C&C Esportes. Todos os direitos reservados.</p>
+</footer>
+
+</body>
+</html>

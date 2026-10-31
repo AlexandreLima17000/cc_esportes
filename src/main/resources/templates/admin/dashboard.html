@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin | C&C Esportes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen">
+
+<!-- Topbar Admin -->
+<header class="border-b border-slate-800 bg-slate-900 px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+        <span class="bg-amber-500 text-slate-950 text-xs font-black px-2.5 py-1 rounded-md uppercase">ADMIN</span>
+        <h1 class="text-xl font-bold tracking-wider text-slate-100">C&C Esportes — Gerenciador do Sistema</h1>
+    </div>
+    <a href="/" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-amber-400 text-sm font-semibold px-4 py-2 rounded-xl transition flex items-center gap-2">
+        <i class="fa-solid fa-store"></i> Ver Loja
+    </a>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- COLUNA ESQUERDA: Formulários -->
+    <div class="space-y-8">
+
+        <!-- 1. Cadastrar Novo Manto -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+            <h2 class="text-lg font-black text-amber-500 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-shirt"></i> Cadastrar Manto
+            </h2>
+
+            <form th:action="@{/admin/produtos/salvar}"
+                  th:object="${novoProduto}"
+                  method="post"
+                  enctype="multipart/form-data"
+                  class="space-y-4">
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nome da Camisa</label>
+                    <input type="text" th:field="*{nome}" placeholder="Ex: Camisa São Paulo I 2026/27" required
+                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 focus:border-amber-500 outline-none text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Preço (R$)</label>
+                    <input type="number" step="0.01" th:field="*{precoAPartir}" placeholder="149.90" required
+                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 focus:border-amber-500 outline-none text-sm">
+                </div>
+
+                <!-- Upload do Computador -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Imagem do Manto (Upload do Computador)</label>
+                    <input type="file" name="fileImagem" accept="image/*" required
+                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-300 text-xs focus:border-amber-500 outline-none file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Categoria Principal -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Categoria</label>
+                        <select id="selectCategoria" th:field="*{categoria.id}" onchange="atualizarTemporadasETimes()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 text-sm focus:border-amber-500 outline-none" required>
+                            <option value="">Selecione...</option>
+                            <option th:each="cat : ${categorias}" th:value="${cat.id}" th:text="${cat.nome}" th:data-nome="${cat.nome}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Equipe / Time Organizado por Ligas -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Equipe / Time</label>
+                        <select id="selectTime" th:field="*{time.id}" onchange="verificarOpcaoOutros()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 text-sm focus:border-amber-500 outline-none" required>
+                            <option value="">Selecione...</option>
+                            <optgroup th:each="liga : ${ligas}" th:label="${liga.nome}" th:data-categoria-id="${liga.categoriaPrincipal != null ? liga.categoriaPrincipal.id : ''}">
+                                <option th:each="t : ${times}"
+                                        th:if="${t.liga != null && t.liga.id == liga.id}"
+                                        th:value="${t.id}"
+                                        th:text="${t.nome}"
+                                        th:data-is-outros="${t.nome.startsWith('Outros')}">
+                                </option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Temporada Dinâmica (sem th:field para evitar erro de binding) -->
+                <div id="boxTemporada">
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Temporada</label>
+                    <select id="selectTemporada" name="temporada" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 text-sm focus:border-amber-500 outline-none">
+                        <option value="">Selecione a Temporada...</option>
+                    </select>
+                </div>
+
+                <!-- Selo / Destaque -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Selo / Destaque</label>
+                    <select th:field="*{selo.id}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 text-sm focus:border-amber-500 outline-none">
+                        <option value="">Sem Selo</option>
+                        <option th:each="s : ${selos}" th:value="${s.id}" th:text="${s.nome}"></option>
+                    </select>
+                </div>
+
+                <!-- Campo extra dinâmico para a opção OUTROS -->
+                <div id="boxCamposOutros" class="hidden bg-slate-950 p-4 rounded-xl border border-amber-500/30 space-y-3">
+                    <p class="text-xs text-amber-400 font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-circle-info"></i> Especifique a Liga e Time Personalizados:
+                    </p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Liga / Campeonato</label>
+                            <input type="text" name="ligaPersonalizada" placeholder="Ex: Eredivisie (Holanda)"
+                                   class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Time / Seleção</label>
+                            <input type="text" name="timePersonalizado" placeholder="Ex: Ajax"
+                                   class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:border-amber-500 outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 rounded-xl transition mt-2 shadow-lg shadow-amber-500/10">
+                    <i class="fa-solid fa-plus"></i> Salvar Manto
+                </button>
+            </form>
+        </div>
+
+        <!-- 2. Cadastrar Categoria e Time Rápido -->
+        <div class="space-y-4">
+            <!-- Nova Categoria -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <h3 class="text-sm font-bold text-amber-500 uppercase mb-3"><i class="fa-solid fa-tags"></i> Nova Categoria</h3>
+                <form th:action="@{/admin/categorias/salvar}" th:object="${novaCategoria}" method="post" class="flex gap-2">
+                    <input type="text" th:field="*{nome}" placeholder="Ex: Retrô 90s" required
+                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:border-amber-500 outline-none">
+                    <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs">OK</button>
+                </form>
+            </div>
+
+            <!-- Novo Time -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <h3 class="text-sm font-bold text-amber-500 uppercase mb-3"><i class="fa-solid fa-shield-halved"></i> Novo Time / Equipe</h3>
+                <form th:action="@{/admin/times/salvar}" th:object="${novoTime}" method="post" class="space-y-3">
+                    <input type="text" th:field="*{nome}" placeholder="Nome do Time (ex: Borussia Dortmund)" required
+                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:border-amber-500 outline-none">
+
+                    <div class="flex gap-2">
+                        <select th:field="*{liga.id}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:border-amber-500 outline-none" required>
+                            <option value="">Selecione a Liga...</option>
+                            <option th:each="liga : ${ligas}" th:value="${liga.id}" th:text="${liga.nome}"></option>
+                        </select>
+                        <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs">OK</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- COLUNA DIREITA: Tabela de Mantos Cadastrados -->
+    <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+        <div>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-black text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-list text-amber-500"></i> Mantos no Catálogo
+                </h2>
+                <span th:text="${produtos.size() + ' Cadastrados'}" class="text-xs bg-slate-800 text-amber-400 px-3 py-1 rounded-full font-bold"></span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-300">
+                    <thead class="bg-slate-950 text-slate-400 text-xs uppercase border-b border-slate-800">
+                    <tr>
+                        <th class="p-3">Imagem</th>
+                        <th class="p-3">Produto</th>
+                        <th class="p-3">Categoria</th>
+                        <th class="p-3">Temporada</th>
+                        <th class="p-3">Preço</th>
+                        <th class="p-3 text-right">Ação</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60">
+                    <tr th:each="prod : ${produtos}" class="hover:bg-slate-800/40 transition">
+                        <td class="p-3">
+                            <img th:src="${prod.imagemUrl}" alt="Foto" class="w-12 h-12 object-cover rounded-lg border border-slate-800">
+                        </td>
+                        <td class="p-3">
+                            <p class="font-bold text-slate-100" th:text="${prod.nome}"></p>
+                            <span th:text="${prod.qualidade}" class="text-[10px] text-amber-500"></span>
+                        </td>
+                        <td class="p-3">
+                            <span th:text="${prod.categoria != null ? prod.categoria.nome : 'Sem Categoria'}" class="bg-slate-800 text-slate-300 text-[11px] font-semibold px-2 py-0.5 rounded"></span>
+                        </td>
+                        <td class="p-3">
+                            <span th:text="${prod.temporada != null ? prod.temporada : '-'}" class="bg-slate-800 text-amber-400 text-xs font-bold px-2 py-1 rounded-md"></span>
+                        </td>
+                        <td class="p-3 font-bold text-amber-400" th:text="${'R$ ' + #numbers.formatDecimal(prod.precoAPartir, 1, 'POINT', 2, 'COMMA')}"></td>
+                        <td class="p-3 text-right">
+                            <a th:href="@{'/admin/produtos/excluir/' + ${prod.id}}"
+                               onclick="return confirm('Tem certeza que deseja excluir esta camisa?');"
+                               class="bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white p-2 rounded-lg transition inline-block">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(produtos)}">
+                        <td colspan="6" class="text-center py-8 text-slate-500">Nenhum manto cadastrado no banco.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- Scripts JavaScript para Filtros e Comportamentos Dinâmicos -->
+<script>
+    function atualizarTemporadasETimes() {
+        const selectCategoria = document.getElementById('selectCategoria');
+        const optionSelecionada = selectCategoria.options[selectCategoria.selectedIndex];
+        const nomeCategoria = optionSelecionada ? optionSelecionada.getAttribute('data-nome') : '';
+        const categoriaId = selectCategoria.value;
+
+        const boxTemporada = document.getElementById('boxTemporada');
+        const selectTemporada = document.getElementById('selectTemporada');
+        const selectTime = document.getElementById('selectTime');
+
+        // 1. Filtrar Times por Categoria Principal
+        const optgroups = selectTime.getElementsByTagName('optgroup');
+        for (let group of optgroups) {
+            const groupCategoriaId = group.getAttribute('data-categoria-id');
+            if (!categoriaId || groupCategoriaId === categoriaId) {
+                group.style.display = '';
+            } else {
+                group.style.display = 'none';
+            }
+        }
+        selectTime.value = '';
+
+        // 2. Atualizar Opções de Temporada
+        selectTemporada.innerHTML = '<option value="">Selecione a Temporada...</option>';
+
+        if (!nomeCategoria || nomeCategoria.toLowerCase() === 'retrô' || nomeCategoria.toLowerCase() === 'retro') {
+            // Oculta temporada para categoria Retrô
+            boxTemporada.classList.add('hidden');
+        } else {
+            boxTemporada.classList.remove('hidden');
+
+            if (nomeCategoria.toLowerCase() === 'nacionais') {
+                // Formato de ano único para Nacionais
+                const anosNacionais = ['2022', '2023', '2024', '2025', '2026', '2027'];
+                anosNacionais.forEach(ano => {
+                    const opt = document.createElement('option');
+                    opt.value = ano;
+                    opt.textContent = ano;
+                    selectTemporada.appendChild(opt);
+                });
+            } else {
+                // Formato com barra para Internacionais e Seleções
+                const temporadasInter = ['2022/23', '2023/24', '2024/25', '2025/26', '2026/27'];
+                temporadasInter.forEach(temp => {
+                    const opt = document.createElement('option');
+                    opt.value = temp;
+                    opt.textContent = temp;
+                    selectTemporada.appendChild(opt);
+                });
+            }
+        }
+        verificarOpcaoOutros();
+    }
+
+    function verificarOpcaoOutros() {
+        const selectTime = document.getElementById('selectTime');
+        const optionSelecionada = selectTime.options[selectTime.selectedIndex];
+        const boxOutros = document.getElementById('boxCamposOutros');
+
+        if (optionSelecionada && optionSelecionada.getAttribute('data-is-outros') === 'true') {
+            boxOutros.classList.remove('hidden');
+        } else {
+            boxOutros.classList.add('hidden');
+        }
+    }
+</script>
+
+</body>
+</html>
