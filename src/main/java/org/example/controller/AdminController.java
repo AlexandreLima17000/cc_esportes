@@ -61,6 +61,7 @@ public class AdminController {
         model.addAttribute("categoria", new Categoria());
         model.addAttribute("novoTime", new Time());
         model.addAttribute("time", new Time());
+        model.addAttribute("temporada", "");
         return "admin/dashboard";
     }
 
@@ -70,11 +71,19 @@ public class AdminController {
                                 @RequestParam(value = "timePersonalizado", required = false) String timePersonalizado,
                                 @RequestParam(value = "fileImagem", required = false) MultipartFile fileImagem) {
 
+        if (produto.getId() != null && (fileImagem == null || fileImagem.isEmpty())) {
+            produtoRepository.findById(produto.getId()).ifPresent(prodExistente -> {
+                produto.setImagemUrl(prodExistente.getImagemUrl());
+            });
+        }
+
         if (timePersonalizado!= null && !timePersonalizado.isBlank()){
             Time timeNovo = new Time();
             timeNovo.setNome(timePersonalizado);
             timeNovo.setIsRetro(false);
             timeRepository.save(timeNovo);
+
+            produto.setTime(timeNovo);
         }
 
         if (produto.getQualidade() == null || produto.getQualidade().isBlank()) {
@@ -114,6 +123,7 @@ public class AdminController {
         return "redirect:/admin";
     }
 
+
     @PostMapping("/categorias/salvar")
     public String salvarCategoria(@ModelAttribute Categoria categoria) {
         categoriaRepository.save(categoria);
@@ -125,4 +135,34 @@ public class AdminController {
         timeRepository.save(time);
         return "redirect:/admin";
     }
+    @GetMapping("/produtos/editar/{id}")
+    public String editarProduto(@PathVariable("id") Integer id, Model model) {
+        Produto produto = produtoRepository.findById(id).orElse(null);
+
+        // Se o produto não for encontrado, redireciona de volta para o admin
+        if (produto == null) {
+            return "redirect:/admin";
+        }
+
+        // Inicializa relacionamentos nulos para não dar erro no Thymeleaf
+        if (produto.getCategoria() == null) produto.setCategoria(new Categoria());
+        if (produto.getTime() == null) produto.setTime(new Time());
+        if (produto.getSelo() == null) produto.setSelo(new Selo());
+
+        model.addAttribute("produtos", produtoRepository.findAllComRelacionamentos());
+        model.addAttribute("categorias", categoriaRepository.findAll());
+        model.addAttribute("times", timeRepository.findAll());
+        model.addAttribute("ligas", ligaRepository.findAll());
+        model.addAttribute("selos", seloRepository.findAll());
+
+        model.addAttribute("novoProduto", produto);
+        model.addAttribute("novaCategoria", new Categoria());
+        model.addAttribute("categoria", new Categoria());
+        model.addAttribute("novoTime", new Time());
+        model.addAttribute("time", new Time());
+        model.addAttribute("temporada", produto.getTemporada());
+
+        return "admin/dashboard";
+    }
+
 }

@@ -33,6 +33,9 @@ public class Produto {
     @Column (name = "temporada", length = 20)
     private String temporada;
 
+    @Column(name = "modelo", length = 50)
+    private String modelo;
+
     @ManyToOne
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
@@ -79,4 +82,7 @@ public class Produto {
 
     public  String getTemporada() { return temporada; }
     public void setTemporada(String temporada) { this.temporada = temporada; }
+
+    public String getModelo() { return modelo; }
+    public void setModelo(String modelo) { this.modelo = modelo; }
 }
