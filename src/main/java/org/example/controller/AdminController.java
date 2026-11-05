@@ -77,7 +77,7 @@ public class AdminController {
             });
         }
 
-        if (timePersonalizado!= null && !timePersonalizado.isBlank()){
+        if (timePersonalizado != null && !timePersonalizado.isBlank()){
             Time timeNovo = new Time();
             timeNovo.setNome(timePersonalizado);
             timeNovo.setIsRetro(false);
@@ -94,9 +94,10 @@ public class AdminController {
             produto.setAtivo(true);
         }
 
+        // SALVA NA PASTA UPLOADS DA RAIZ DO PROJETO (FORA DE SRC)
         if (fileImagem != null && !fileImagem.isEmpty()) {
             try {
-                String diretorioUpload = "src/main/resources/static/images/uploads/";
+                String diretorioUpload = "uploads/";
                 File pasta = new File(diretorioUpload);
                 if (!pasta.exists()) {
                     pasta.mkdirs();
@@ -106,7 +107,9 @@ public class AdminController {
                 Path caminhoCompleto = Paths.get(diretorioUpload + nomeArquivo);
 
                 Files.copy(fileImagem.getInputStream(), caminhoCompleto, StandardCopyOption.REPLACE_EXISTING);
-                produto.setImagemUrl("/images/uploads/" + nomeArquivo);
+
+                // Grava a URL publica para o navegador
+                produto.setImagemUrl("/uploads/" + nomeArquivo);
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -116,13 +119,11 @@ public class AdminController {
         produtoRepository.save(produto);
         return "redirect:/admin";
     }
-
     @GetMapping("/produtos/excluir/{id}")
     public String excluirProduto(@PathVariable("id") Integer id) {
         produtoRepository.deleteById(id);
         return "redirect:/admin";
     }
-
 
     @PostMapping("/categorias/salvar")
     public String salvarCategoria(@ModelAttribute Categoria categoria) {
@@ -135,16 +136,15 @@ public class AdminController {
         timeRepository.save(time);
         return "redirect:/admin";
     }
+
     @GetMapping("/produtos/editar/{id}")
     public String editarProduto(@PathVariable("id") Integer id, Model model) {
         Produto produto = produtoRepository.findById(id).orElse(null);
 
-        // Se o produto não for encontrado, redireciona de volta para o admin
         if (produto == null) {
             return "redirect:/admin";
         }
 
-        // Inicializa relacionamentos nulos para não dar erro no Thymeleaf
         if (produto.getCategoria() == null) produto.setCategoria(new Categoria());
         if (produto.getTime() == null) produto.setTime(new Time());
         if (produto.getSelo() == null) produto.setSelo(new Selo());
@@ -164,5 +164,4 @@ public class AdminController {
 
         return "admin/dashboard";
     }
-
 }

@@ -9,14 +9,24 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen">
 
-<!-- Topbar Admin -->
-<header class="border-b border-slate-800 bg-slate-900 px-8 py-4 flex justify-between items-center sticky top-0 z-50">
-    <div class="flex items-center gap-3">
-        <span class="bg-amber-500 text-slate-950 text-xs font-black px-2.5 py-1 rounded-md uppercase">ADMIN</span>
-        <h1 class="text-xl font-bold tracking-wider text-slate-100">C&C Esportes — Gerenciador do Sistema</h1>
+<!-- Topbar Admin com Logo C&C ESPORTE -->
+<header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-8 py-3 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-4">
+        <!-- Logo C&C Esporte -->
+        <div class="flex items-center gap-3">
+            <img th:src="@{/images/logo.png}" src="/images/logo.png" alt="C&C ESPORTE" class="h-12 w-auto object-contain drop-shadow-md">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="bg-amber-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider">ADMIN</span>
+                    <h1 class="text-lg font-black tracking-wider text-slate-100 uppercase">Painel de Gestão</h1>
+                </div>
+                <p class="text-xs text-slate-400 font-medium">Controle do Catálogo de Mantos</p>
+            </div>
+        </div>
     </div>
-    <a href="/" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-amber-400 text-sm font-semibold px-4 py-2 rounded-xl transition flex items-center gap-2">
-        <i class="fa-solid fa-store"></i> Ver Loja
+
+    <a href="/" target="_blank" class="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-lg shadow-amber-500/10 flex items-center gap-2">
+        <i class="fa-solid fa-store"></i> Ver Loja On-line
     </a>
 </header>
 
@@ -26,7 +36,7 @@
     <div class="space-y-8">
 
         <!-- 1. Cadastrar Novo Manto -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 shadow-xl">
             <h2 class="text-lg font-black text-amber-500 mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-shirt"></i> Cadastrar Manto
             </h2>
@@ -195,7 +205,7 @@
                     <tbody class="divide-y divide-slate-800/60">
                     <tr th:each="prod : ${produtos}" class="hover:bg-slate-800/40 transition">
                         <td class="p-3">
-                            <img th:src="${prod.imagemUrl}" alt="Foto" class="w-12 h-12 object-cover rounded-lg border border-slate-800">
+                            <img th:src="@{${#strings.startsWith(prod.imagemUrl, '/uploads/')} ? ${prod.imagemUrl} : (${#strings.startsWith(prod.imagemUrl, '/')} ? ${prod.imagemUrl} : '/uploads/' + ${prod.imagemUrl})}" alt="Foto" class="w-12 h-12 object-cover rounded-lg border border-slate-800">
                         </td>
                         <td class="p-3">
                             <p class="font-bold text-slate-100" th:text="${prod.nome}"></p>
@@ -316,12 +326,23 @@
                 </div>
             </div>
 
-            <!-- Temporada em Dropdown Dinâmico no Modal -->
-            <div id="boxTemporadaEdit">
-                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Temporada</label>
-                <select id="editTemporada" name="temporada" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 text-sm focus:border-amber-500 outline-none">
-                    <option value="">Selecione a Temporada...</option>
-                </select>
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Temporada em Dropdown Dinâmico no Modal -->
+                <div id="boxTemporadaEdit">
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Temporada</label>
+                    <select id="editTemporada" name="temporada" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 text-sm focus:border-amber-500 outline-none">
+                        <option value="">Selecione a Temporada...</option>
+                    </select>
+                </div>
+
+                <!-- Selo / Destaque no Modal -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Selo / Destaque</label>
+                    <select id="editSelo" name="selo.id" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 text-sm focus:border-amber-500 outline-none">
+                        <option value="">Sem Selo</option>
+                        <option th:each="s : ${selos}" th:value="${s.id}" th:text="${s.nome}"></option>
+                    </select>
+                </div>
             </div>
 
             <div class="flex gap-3 pt-3 border-t border-slate-800">
@@ -447,12 +468,14 @@
         const categoria = btn.getAttribute('data-categoria');
         const time = btn.getAttribute('data-time');
         const temporada = btn.getAttribute('data-temporada') || '';
+        const selo = btn.getAttribute('data-selo') || '';
 
         document.getElementById('editId').value = id;
         document.getElementById('editNome').value = nome;
         document.getElementById('editPreco').value = preco;
         document.getElementById('editModelo').value = modelo;
         document.getElementById('editCategoria').value = categoria;
+        document.getElementById('editSelo').value = selo;
 
         atualizarTemporadasETimesEdit(temporada);
 
