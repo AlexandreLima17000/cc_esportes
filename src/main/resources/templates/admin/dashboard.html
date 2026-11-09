@@ -205,7 +205,7 @@
                     <tbody class="divide-y divide-slate-800/60">
                     <tr th:each="prod : ${produtos}" class="hover:bg-slate-800/40 transition">
                         <td class="p-3">
-                            <img th:src="@{${#strings.startsWith(prod.imagemUrl, '/uploads/')} ? ${prod.imagemUrl} : (${#strings.startsWith(prod.imagemUrl, '/')} ? ${prod.imagemUrl} : '/uploads/' + ${prod.imagemUrl})}" alt="Foto" class="w-12 h-12 object-cover rounded-lg border border-slate-800">
+                            <img th:src="@{${prod.imagemUrl}}" alt="Foto" class="w-12 h-12 object-cover rounded-lg border border-slate-800">
                         </td>
                         <td class="p-3">
                             <p class="font-bold text-slate-100" th:text="${prod.nome}"></p>

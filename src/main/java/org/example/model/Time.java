@@ -1,7 +1,6 @@
 package org.example.model;
 
 import jakarta.persistence.*;
-import org.example.model.Liga;
 
 @Entity
 @Table(name = "times")
@@ -24,20 +23,47 @@ public class Time {
     @JoinColumn(name = "liga_id", nullable = false)
     private Liga liga;
 
+    // Construtor Padrão
     public Time() {}
 
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    // Getters e Setters
+    public Integer getId() {
+        return id;
+    }
 
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    public String getEscudoUrl() { return escudoUrl; }
-    public void setEscudoUrl(String escudoUrl) { this.escudoUrl = escudoUrl; }
+    public String getNome() {
+        return nome;
+    }
 
-    public Boolean getIsRetro() { return isRetro; }
-    public void setIsRetro(Boolean isRetro) { this.isRetro = isRetro; }
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
-    public Liga getLiga() { return liga; }
-    public void setLiga(Liga liga) { this.liga = liga; }
+    public String getEscudoUrl() {
+        return escudoUrl;
+    }
+
+    public void setEscudoUrl(String escudoUrl) {
+        this.escudoUrl = escudoUrl;
+    }
+
+    public Boolean getIsRetro() {
+        return isRetro;
+    }
+
+    public void setIsRetro(Boolean isRetro) {
+        this.isRetro = isRetro;
+    }
+
+    public Liga getLiga() {
+        return liga;
+    }
+
+    public void setLiga(Liga liga) {
+        this.liga = liga;
+    }
 }
