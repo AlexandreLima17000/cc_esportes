@@ -37,3 +37,10 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# Arquivo de variáveis de ambiente com credenciais
+.env
+*.env
+
+# Pasta local de uploads de imagens
+uploads/
