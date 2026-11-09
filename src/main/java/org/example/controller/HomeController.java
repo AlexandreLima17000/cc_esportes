@@ -36,10 +36,15 @@ public class HomeController {
 
         if (busca != null && !busca.isBlank()) {
             model.addAttribute("produtos", produtoRepository.findByNomeContainingIgnoreCase(busca));
+            model.addAttribute("categoriaNome", "Busca: " + busca);
         } else if (categoriaId != null) {
             model.addAttribute("produtos", produtoRepository.findByCategoriaId(categoriaId));
+            categoriaRepository.findById(categoriaId).ifPresent(cat ->
+                    model.addAttribute("categoriaNome", cat.getNome())
+            );
         } else {
             model.addAttribute("produtos", produtoRepository.findAllComRelacionamentos());
+            model.addAttribute("categoriaNome", null);
         }
 
         return "index";

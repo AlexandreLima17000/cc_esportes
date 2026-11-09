@@ -205,7 +205,9 @@
                     <tbody class="divide-y divide-slate-800/60">
                     <tr th:each="prod : ${produtos}" class="hover:bg-slate-800/40 transition">
                         <td class="p-3">
-                            <img th:src="@{${prod.imagemUrl}}" alt="Foto" class="w-12 h-12 object-cover rounded-lg border border-slate-800">
+                            <img th:src="${prod != null and prod.imagemUrl != null ? prod.imagemUrl : '/images/logo.png'}"
+                                 alt="Foto"
+                                 class="w-12 h-12 object-cover rounded-lg border border-slate-800">
                         </td>
                         <td class="p-3">
                             <p class="font-bold text-slate-100" th:text="${prod.nome}"></p>
