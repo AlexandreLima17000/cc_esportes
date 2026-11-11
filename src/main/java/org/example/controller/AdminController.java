@@ -1,12 +1,14 @@
 package org.example.controller;
 
 import org.example.model.Categoria;
-import org.example.model.Selo;
 import org.example.model.Produto;
+import org.example.model.Promocao;
+import org.example.model.Selo;
 import org.example.model.Time;
 import org.example.repository.CategoriaRepository;
 import org.example.repository.LigaRepository;
 import org.example.repository.ProdutoRepository;
+import org.example.repository.PromocaoRepository;
 import org.example.repository.SeloRepository;
 import org.example.repository.TimeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -42,6 +45,9 @@ public class AdminController {
     @Autowired
     private LigaRepository ligaRepository;
 
+    @Autowired
+    private PromocaoRepository promocaoRepository;
+
     @GetMapping
     public String dashboard(Model model) {
 
@@ -55,12 +61,14 @@ public class AdminController {
         model.addAttribute("times", timeRepository.findAll());
         model.addAttribute("ligas", ligaRepository.findAll());
         model.addAttribute("selos", seloRepository.findAll());
+        model.addAttribute("promocoes", promocaoRepository.findAll());
 
         model.addAttribute("novoProduto", produtoForm);
         model.addAttribute("novaCategoria", new Categoria());
         model.addAttribute("categoria", new Categoria());
         model.addAttribute("novoTime", new Time());
         model.addAttribute("time", new Time());
+        model.addAttribute("novaPromocao", new Promocao());
         model.addAttribute("temporada", "");
         return "admin/dashboard";
     }
@@ -81,8 +89,12 @@ public class AdminController {
             Time timeNovo = new Time();
             timeNovo.setNome(timePersonalizado);
             timeNovo.setIsRetro(false);
-            timeRepository.save(timeNovo);
 
+            if (!ligaRepository.findAll().isEmpty()) {
+                timeNovo.setLiga(ligaRepository.findAll().get(0));
+            }
+
+            timeRepository.save(timeNovo);
             produto.setTime(timeNovo);
         }
 
@@ -94,7 +106,6 @@ public class AdminController {
             produto.setAtivo(true);
         }
 
-        // SALVA NA PASTA UPLOADS DA RAIZ DO PROJETO (FORA DE SRC)
         if (fileImagem != null && !fileImagem.isEmpty()) {
             try {
                 String diretorioUpload = "uploads/";
@@ -108,7 +119,6 @@ public class AdminController {
 
                 Files.copy(fileImagem.getInputStream(), caminhoCompleto, StandardCopyOption.REPLACE_EXISTING);
 
-                // Grava a URL publica para o navegador
                 produto.setImagemUrl("/uploads/" + nomeArquivo);
 
             } catch (IOException e) {
@@ -119,6 +129,7 @@ public class AdminController {
         produtoRepository.save(produto);
         return "redirect:/admin";
     }
+
     @GetMapping("/produtos/excluir/{id}")
     public String excluirProduto(@PathVariable("id") Integer id) {
         produtoRepository.deleteById(id);
@@ -154,14 +165,109 @@ public class AdminController {
         model.addAttribute("times", timeRepository.findAll());
         model.addAttribute("ligas", ligaRepository.findAll());
         model.addAttribute("selos", seloRepository.findAll());
+        model.addAttribute("promocoes", promocaoRepository.findAll());
 
         model.addAttribute("novoProduto", produto);
         model.addAttribute("novaCategoria", new Categoria());
         model.addAttribute("categoria", new Categoria());
         model.addAttribute("novoTime", new Time());
         model.addAttribute("time", new Time());
+        model.addAttribute("novaPromocao", new Promocao());
         model.addAttribute("temporada", produto.getTemporada());
 
         return "admin/dashboard";
+    }
+
+    // --- GESTÃO DE PROMOÇÕES E BANNERS ---
+
+    @PostMapping("/promocoes/salvar")
+    public String salvarPromocao(@ModelAttribute Promocao promocao,
+                                 @RequestParam(value = "fileBanner", required = false) MultipartFile fileBanner,
+                                 @RequestParam(value = "produtosIds", required = false) List<Integer> produtosIds) {
+
+        if (promocao.getId() != null && (fileBanner == null || fileBanner.isEmpty())) {
+            promocaoRepository.findById(promocao.getId()).ifPresent(pExistente -> {
+                promocao.setImagemUrl(pExistente.getImagemUrl());
+            });
+        }
+
+        if (produtosIds != null && !produtosIds.isEmpty()) {
+            List<Produto> produtosSelecionados = produtoRepository.findAllById(produtosIds);
+            promocao.setProdutos(produtosSelecionados);
+        } else {
+            promocao.getProdutos().clear();
+        }
+
+        if (fileBanner != null && !fileBanner.isEmpty()) {
+            try {
+                String diretorioUpload = "uploads/";
+                File pasta = new File(diretorioUpload);
+                if (!pasta.exists()) {
+                    pasta.mkdirs();
+                }
+
+                String nomeArquivo = "promo_" + UUID.randomUUID().toString() + "_" + fileBanner.getOriginalFilename();
+                Path caminhoCompleto = Paths.get(diretorioUpload + nomeArquivo);
+
+                Files.copy(fileBanner.getInputStream(), caminhoCompleto, StandardCopyOption.REPLACE_EXISTING);
+
+                promocao.setImagemUrl("/uploads/" + nomeArquivo);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (promocao.getAtiva() == null) {
+            promocao.setAtiva(true);
+        }
+
+        promocaoRepository.save(promocao);
+        return "redirect:/admin";
+    }
+
+    @GetMapping("/promocoes/editar/{id}")
+    public String editarPromocao(@PathVariable("id") Integer id, Model model) {
+        Promocao promocao = promocaoRepository.findById(id).orElse(null);
+        if (promocao == null) {
+            return "redirect:/admin";
+        }
+
+        Produto produtoForm = new Produto();
+        produtoForm.setCategoria(new Categoria());
+        produtoForm.setTime(new Time());
+        produtoForm.setSelo(new Selo());
+
+        model.addAttribute("produtos", produtoRepository.findAllComRelacionamentos());
+        model.addAttribute("categorias", categoriaRepository.findAll());
+        model.addAttribute("times", timeRepository.findAll());
+        model.addAttribute("ligas", ligaRepository.findAll());
+        model.addAttribute("selos", seloRepository.findAll());
+        model.addAttribute("promocoes", promocaoRepository.findAll());
+
+        model.addAttribute("novoProduto", produtoForm);
+        model.addAttribute("novaCategoria", new Categoria());
+        model.addAttribute("categoria", new Categoria());
+        model.addAttribute("novoTime", new Time());
+        model.addAttribute("time", new Time());
+        model.addAttribute("novaPromocao", promocao);
+        model.addAttribute("temporada", "");
+
+        return "admin/dashboard";
+    }
+
+    @GetMapping("/promocoes/status/{id}")
+    public String alternarStatusPromocao(@PathVariable("id") Integer id) {
+        promocaoRepository.findById(id).ifPresent(p -> {
+            p.setAtiva(!Boolean.TRUE.equals(p.getAtiva()));
+            promocaoRepository.save(p);
+        });
+        return "redirect:/admin";
+    }
+
+    @GetMapping("/promocoes/excluir/{id}")
+    public String excluirPromocao(@PathVariable("id") Integer id) {
+        promocaoRepository.deleteById(id);
+        return "redirect:/admin";
     }
 }

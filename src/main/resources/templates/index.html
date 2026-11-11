@@ -3,146 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C&C Esportes | Mantos Exclusivos</title>
+    <title>Painel Administrativo | C&C ESPORTE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen">
 
-<!-- TOPBAR / HEADER -->
-<header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-6 py-4 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-
-        <!-- Logo C&C Esporte -->
-        <a href="/" class="flex items-center gap-3">
-            <img th:src="@{/images/logo.png}" src="/images/logo.png" alt="C&C ESPORTE" class="h-12 w-auto object-contain drop-shadow-md">
-            <div>
-                <h1 class="text-xl font-black tracking-wider text-slate-100 uppercase">C&C ESPORTE</h1>
-                <p class="text-[10px] text-amber-500 font-bold uppercase tracking-widest">Loja Oficial de Mantos</p>
-            </div>
-        </a>
-
-        <!-- Barra de Busca -->
-        <form th:action="@{/}" method="get" class="w-full md:w-96 flex items-center bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 focus-within:border-amber-500 transition">
-            <input type="text" name="busca" placeholder="Buscar por time, seleção ou manto..."
-                   class="w-full bg-transparent text-xs text-slate-100 outline-none px-2 py-1">
-            <button type="submit" class="text-amber-500 hover:text-amber-400 p-1">
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
-        </form>
-
+<!-- HEADER / TOPBAR -->
+<header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-6 py-4 sticky top-0 z-50 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+        <img th:src="@{/images/logo.png}" src="/images/logo.png" alt="C&C ESPORTE" class="h-10 w-auto object-contain">
+        <div>
+            <h1 class="text-lg font-black tracking-wider text-slate-100 uppercase">PAINEL ADMINISTRATIVO</h1>
+            <p class="text-[10px] text-amber-500 font-bold uppercase tracking-widest">Gestão de Catálogo & Ofertas</p>
+        </div>
     </div>
+    <a href="/" class="text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl border border-slate-700 transition flex items-center gap-2">
+        <i class="fa-solid fa-store text-amber-500"></i> Ver Loja
+    </a>
 </header>
 
-<!-- HERO BANNER -->
-<section class="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border-b border-slate-800 py-12 px-6">
-    <div class="max-w-7xl mx-auto text-center space-y-4">
-        <span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-            Coleções Thai 1.1 & Retrô
-        </span>
-        <h2 class="text-3xl md:text-5xl font-black tracking-tight text-slate-100 uppercase">
-            VISTA A PAIXÃO PELO SEU MANTO
-        </h2>
-        <p class="text-slate-400 text-sm max-w-2xl mx-auto">
-            Edições de Seleções, Ligas Nacionais e Retrô com máxima qualidade, tecnologia de tecido e entrega garantida.
-        </p>
-    </div>
-</section>
+<main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
 
-<!-- MAIN CONTENT: FILTROS & VITRINE DE PRODUTOS -->
-<main class="max-w-7xl mx-auto px-6 py-10 flex-grow">
-
-    <!-- Navegação por Categorias -->
-    <div class="flex flex-wrap items-center justify-center gap-3 mb-10">
-        <a href="/" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition">
-            Todos os Mantos
-        </a>
-        <a th:each="cat : ${categorias}"
-           th:href="@{'/?categoriaId=' + ${cat.id}}"
-           th:text="${cat.nome}"
-           class="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-semibold px-4 py-2 rounded-xl text-xs transition">
-        </a>
-    </div>
-
-    <!-- Título da Seção -->
-    <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-black text-slate-100 flex items-center gap-2 uppercase tracking-wide">
-            <i class="fa-solid fa-fire text-amber-500"></i>
-            <span th:text="${categoriaNome != null ? 'Categoria: ' + categoriaNome : 'Todos os Mantos'}">Todos os Mantos</span>
+    <!-- 1. BLOCO DE GESTÃO DE PROMOÇÕES E OFERTAS -->
+    <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 shadow-xl space-y-6">
+        <h3 class="text-lg font-black text-slate-100 flex items-center gap-2 uppercase tracking-wide">
+            <i class="fa-solid fa-rectangle-ad text-amber-500"></i> Gestão de Promoções & Banners
         </h3>
-        <span th:if="${produtos != null}" th:text="${produtos.size() + ' mantos'}" class="text-xs text-slate-400 font-medium"></span>
+
+        <!-- FORMULÁRIO DE CADASTRO/EDIÇÃO DE PROMOÇÃO -->
+        <form th:action="@{/admin/promocoes/salvar}" th:object="${novaPromocao}" method="post" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-slate-800 pb-6">
+            <input type="hidden" th:field="*{id}">
+
+            <!-- Título da Oferta -->
+            <div>
+                <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Título da Promoção</label>
+                <input type="text" th:field="*{titulo}" placeholder="Ex: BLACK FRIDAY - 40% OFF" required
+                       class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-amber-500">
+            </div>
+
+            <!-- Cupom de Desconto -->
+            <div>
+                <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Cupom de Desconto (Opcional)</label>
+                <input type="text" th:field="*{cupomCodigo}" placeholder="Ex: MANTO10"
+                       class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-amber-500">
+            </div>
+
+            <!-- Imagem do Banner -->
+            <div>
+                <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Imagem do Banner Promocional</label>
+                <input type="file" name="fileBanner" accept="image/*"
+                       class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-amber-500 file:text-slate-950 file:font-black">
+            </div>
+
+            <!-- Subtítulo / Descrição Curta -->
+            <div>
+                <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Subtítulo / Descrição</label>
+                <input type="text" th:field="*{subtitulo}" placeholder="Ex: Válido para mantos selecionados Thai 1.1"
+                       class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-amber-500">
+            </div>
+
+            <!-- Seleção de Mantos em Promoção -->
+            <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Selecione os Mantos Participantes da Oferta</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 bg-slate-950 border border-slate-800 rounded-xl p-3 max-h-40 overflow-y-auto">
+                    <label th:each="prod : ${produtos}" class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer hover:text-amber-400">
+                        <input type="checkbox" name="produtosIds" th:value="${prod.id}"
+                               th:checked="${novaPromocao.produtos != null and novaPromocao.produtos.contains(prod)}"
+                               class="accent-amber-500 rounded">
+                        <span th:text="${prod.nome}"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Botão Salvar Promoção -->
+            <div class="md:col-span-2 flex justify-end gap-3">
+                <a th:if="${novaPromocao.id != null}" href="/admin" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition">
+                    Cancelar Edição
+                </a>
+                <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition">
+                    <span th:text="${novaPromocao.id != null ? 'Atualizar Promoção' : '+ Salvar Promoção'}"></span>
+                </button>
+            </div>
+        </form>
+
+        <!-- TABELA DE PROMOÇÕES CADASTRADAS -->
+        <div class="space-y-3">
+            <h4 class="text-xs font-black text-slate-400 uppercase tracking-wider">Promoções Cadastradas</h4>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                    <tr>
+                        <th class="py-3 px-3">Banner</th>
+                        <th class="py-3 px-3">Título / Cupom</th>
+                        <th class="py-3 px-3">Mantos Incluídos</th>
+                        <th class="py-3 px-3 text-center">Status</th>
+                        <th class="py-3 px-3 text-center">Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60">
+                    <tr th:each="promo : ${promocoes}" class="hover:bg-slate-950/40 transition">
+                        <td class="py-3 px-3">
+                            <img th:src="${promo.imagemUrl != null ? promo.imagemUrl : '/images/logo.png'}"
+                                 alt="Banner"
+                                 class="w-20 h-10 object-cover rounded-lg border border-slate-800">
+                        </td>
+                        <td class="py-3 px-3">
+                            <span class="font-bold text-slate-100 block" th:text="${promo.titulo}"></span>
+                            <span th:if="${promo.cupomCodigo != null and !promo.cupomCodigo.isBlank()}"
+                                  class="text-[10px] bg-amber-500/10 text-amber-400 font-mono px-2 py-0.5 rounded border border-amber-500/20"
+                                  th:text="${'Cupom: ' + promo.cupomCodigo}"></span>
+                        </td>
+                        <td class="py-3 px-3">
+                                    <span class="bg-slate-800 text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded"
+                                          th:text="${promo.produtos != null ? promo.produtos.size() + ' mantos' : '0 mantos'}"></span>
+                        </td>
+                        <td class="py-3 px-3 text-center">
+                            <a th:href="@{'/admin/promocoes/status/' + ${promo.id}}"
+                               th:class="${promo.ativa ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400 border border-slate-700'}"
+                               class="text-[10px] font-bold px-2.5 py-1 rounded-full border transition">
+                                <span th:text="${promo.ativa ? 'Ativa' : 'Inativa'}"></span>
+                            </a>
+                        </td>
+                        <td class="py-3 px-3 text-center">
+                            <div class="flex justify-center items-center gap-2">
+                                <a th:href="@{'/admin/promocoes/editar/' + ${promo.id}}" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg transition" title="Editar">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <a th:href="@{'/admin/promocoes/excluir/' + ${promo.id}}" onclick="return confirm('Tem certeza que deseja excluir esta promoção?')" class="p-1.5 bg-slate-800 hover:bg-rose-900/40 text-rose-500 rounded-lg transition" title="Excluir">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${promocoes == null || #lists.isEmpty(promocoes)}">
+                        <td colspan="5" class="py-4 text-center text-slate-500">Nenhuma promoção cadastrada até o momento.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <!-- VITRINE EM GRID -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <!-- 2. PAINEL PRINCIPAL: FORMULÁRIO DE MANTO & TABELA DE CATÁLOGO -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        <!-- CARD DE PRODUTO -->
-        <div th:each="prod : ${produtos}" th:if="${prod != null}" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col justify-between hover:border-amber-500/50 transition group">
+        <!-- FORMULÁRIO DE PRODUTO -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+            <h3 class="text-lg font-black text-slate-100 flex items-center gap-2 uppercase tracking-wide">
+                <i class="fa-solid fa-shirt text-amber-500"></i> Cadastrar Manto
+            </h3>
 
-            <div>
-                <!-- Imagem do Produto + Selo -->
-                <div class="relative w-full h-64 bg-slate-950 rounded-xl overflow-hidden mb-4 border border-slate-800/80">
+            <form th:action="@{/admin/produtos/salvar}" th:object="${novoProduto}" method="post" enctype="multipart/form-data" class="space-y-4">
+                <input type="hidden" th:field="*{id}">
 
-                    <!-- Selo de Destaque -->
-                    <span th:if="${prod.selo != null}"
-                          th:text="${prod.selo.nome}"
-                          class="absolute top-2 left-2 z-10 bg-amber-500 text-slate-950 text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider shadow">
-                    </span>
-
-                    <!-- Imagem Mapeada Segura -->
-                    <img th:src="${prod.imagemUrl != null ? prod.imagemUrl : '/images/logo.png'}"
-                         alt="Foto Manto"
-                         class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Nome da Camisa</label>
+                    <input type="text" th:field="*{nome}" placeholder="Ex: Camisa São Paulo I 2026/27" required
+                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-amber-500">
                 </div>
 
-                <!-- Detalhes do Produto -->
-                <div class="space-y-1 mb-4">
-                    <span th:text="${prod.qualidade != null ? prod.qualidade : 'Qualidade Thai 1.1'}" class="text-[10px] text-amber-500 font-bold uppercase tracking-wider block"></span>
-                    <h4 class="font-bold text-slate-100 text-sm group-hover:text-amber-400 transition" th:text="${prod.nome}"></h4>
-
-                    <div class="flex items-center gap-2 pt-1">
-                        <span th:text="${prod.modelo != null ? prod.modelo : 'Torcedor'}" class="bg-amber-500/10 text-amber-400 text-[10px] font-semibold px-2 py-0.5 rounded border border-amber-500/20"></span>
-                        <span th:if="${prod.temporada != null && !prod.temporada.isBlank()}" th:text="${prod.temporada}" class="bg-slate-800 text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded"></span>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Preço (R$)</label>
+                        <input type="number" step="0.01" th:field="*{precoAPartir}" placeholder="159.90" required
+                               class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Modelo / Versão</label>
+                        <select th:field="*{modelo}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-amber-500">
+                            <option value="Torcedor">Torcedor</option>
+                            <option value="Jogador">Jogador</option>
+                            <option value="Retrô">Retrô</option>
+                        </select>
                     </div>
                 </div>
-            </div>
 
-            <!-- Preço e Botão Comprar -->
-            <div class="pt-3 border-t border-slate-800/80 flex justify-between items-center">
                 <div>
-                    <span class="text-[10px] text-slate-400 uppercase font-medium block">A partir de</span>
-                    <span class="text-base font-black text-amber-400" th:text="${prod.precoAPartir != null ? 'R$ ' + #numbers.formatDecimal(prod.precoAPartir, 1, 'POINT', 2, 'COMMA') : 'R$ 0,00'}"></span>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Imagem do Manto</label>
+                    <input type="file" name="fileImagem" accept="image/*"
+                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-amber-500 file:text-slate-950 file:font-black">
                 </div>
 
-                <a th:href="@{'https://api.whatsapp.com/send?phone=5561999999999&text=Olá!%20Tenho%20interesse%20na%20' + ${prod.nome}}"
-                   target="_blank"
-                   class="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-lg shadow-amber-500/10">
-                    Comprar
-                </a>
-            </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Categoria</label>
+                        <select th:field="*{categoria.id}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-amber-500">
+                            <option value="">Selecione...</option>
+                            <option th:each="cat : ${categorias}" th:value="${cat.id}" th:text="${cat.nome}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Equipe / Time</label>
+                        <select th:field="*{time.id}" size="1" class="w-full max-h-32 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-amber-500 overflow-y-auto">
+                            <option value="">Selecione...</option>
+                            <option th:each="t : ${times}" th:value="${t.id}" th:text="${t.nome}"></option>
+                        </select>
+                    </div>
+                </div>
 
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Temporada</label>
+                        <select th:field="*{temporada}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-amber-500">
+                            <option value="">Selecione...</option>
+                            <option value="2026/27">2026/27</option>
+                            <option value="2025/26">2025/26</option>
+                            <option value="2024/25">2024/25</option>
+                            <option value="Retrô Classic">Retrô Classic</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Selo / Destaque</label>
+                        <select th:field="*{selo.id}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-amber-500">
+                            <option value="">Sem Selo</option>
+                            <option th:each="s : ${selos}" th:value="${s.id}" th:text="${s.nome}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl text-xs uppercase tracking-wider transition">
+                    + Salvar Manto
+                </button>
+            </form>
         </div>
 
-        <!-- Mensagem se não houver produtos -->
-        <div th:if="${produtos == null || #lists.isEmpty(produtos)}" class="col-span-full py-16 text-center space-y-2">
-            <i class="fa-solid fa-shirt text-4xl text-slate-700"></i>
-            <p class="text-slate-400 font-medium">Nenhum manto encontrado no catálogo no momento.</p>
+        <!-- TABELA DE PRODUTOS CADASTRADOS -->
+        <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4 overflow-hidden">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 class="text-lg font-black text-slate-100 flex items-center gap-2 uppercase tracking-wide">
+                    <i class="fa-solid fa-list-check text-amber-500"></i> Mantos no Catálogo
+                </h3>
+                <span th:text="${produtos.size() + ' Cadastrados'}" class="bg-slate-800 text-amber-400 text-xs font-bold px-3 py-1 rounded-full border border-slate-700"></span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                    <tr>
+                        <th class="py-3 px-3">Imagem</th>
+                        <th class="py-3 px-3">Produto</th>
+                        <th class="py-3 px-3">Modelo</th>
+                        <th class="py-3 px-3">Categoria</th>
+                        <th class="py-3 px-3">Temporada</th>
+                        <th class="py-3 px-3">Preço</th>
+                        <th class="py-3 px-3 text-center">Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60">
+                    <tr th:each="prod : ${produtos}" class="hover:bg-slate-950/40 transition">
+                        <td class="py-3 px-3">
+                            <img th:src="${prod != null and prod.imagemUrl != null ? prod.imagemUrl : '/images/logo.png'}"
+                                 alt="Foto"
+                                 class="w-12 h-12 object-cover rounded-lg border border-slate-800">
+                        </td>
+                        <td class="py-3 px-3">
+                            <span class="font-bold text-slate-100 block" th:text="${prod.nome}"></span>
+                            <span class="text-[10px] text-amber-500 font-semibold" th:text="${prod.qualidade}"></span>
+                        </td>
+                        <td class="py-3 px-3">
+                            <span class="bg-amber-500/10 text-amber-400 text-[10px] font-semibold px-2 py-0.5 rounded border border-amber-500/20" th:text="${prod.modelo}"></span>
+                        </td>
+                        <td class="py-3 px-3">
+                            <span class="bg-slate-800 text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded" th:text="${prod.categoria != null ? prod.categoria.nome : '-'}"></span>
+                        </td>
+                        <td class="py-3 px-3 text-slate-400" th:text="${prod.temporada != null ? prod.temporada : '-'}"></td>
+                        <td class="py-3 px-3 font-black text-amber-400" th:text="${'R$ ' + #numbers.formatDecimal(prod.precoAPartir, 1, 'POINT', 2, 'COMMA')}"></td>
+                        <td class="py-3 px-3 text-center">
+                            <div class="flex justify-center items-center gap-2">
+                                <a th:href="@{'/admin/produtos/editar/' + ${prod.id}}" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg transition">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <a th:href="@{'/admin/produtos/excluir/' + ${prod.id}}" onclick="return confirm('Tem certeza que deseja excluir este manto?')" class="p-1.5 bg-slate-800 hover:bg-rose-900/40 text-rose-500 rounded-lg transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
     </div>
 
 </main>
-
-<!-- FOOTER -->
-<footer class="border-t border-slate-800 bg-slate-900 py-6 px-6 text-center text-xs text-slate-500">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-        <p>© 2026 C&C Esportes — Todos os direitos reservados.</p>
-        <div class="flex gap-4 text-slate-400">
-            <a href="#" class="hover:text-amber-500 transition"><i class="fa-brands fa-instagram text-base"></i></a>
-            <a href="#" class="hover:text-amber-500 transition"><i class="fa-brands fa-whatsapp text-base"></i></a>
-        </div>
-    </div>
-</footer>
 
 </body>
 </html>
